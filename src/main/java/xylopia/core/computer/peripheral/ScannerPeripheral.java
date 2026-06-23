@@ -8,8 +8,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.fml.ModList;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class ScannerPeripheral extends BangbooPeripheral {
-    private static final boolean SABLE_LOADED = ModList.get().isLoaded("sable");
 
     public ScannerPeripheral(int computerID) { super(computerID); }
 
@@ -29,7 +26,7 @@ public class ScannerPeripheral extends BangbooPeripheral {
     public final List<Map<String, Object>> scan(IArguments args) throws LuaException {
         var bangboo = bangboo();
         if (bangboo == null || !(bangboo.level() instanceof ServerLevel level)) return List.of();
-        int radius = Math.min(Math.max(1, args.getInt(0)), 64);
+        int radius = Math.min(Math.max(1, args.getInt(0)), xylopia.core.Config.SCAN_MAX_ENTITY_RADIUS.get());
 
         // Optional second arg: table of name strings to include.
         // Matches against the "name" field of each result (registry name for blocks,
@@ -76,7 +73,7 @@ public class ScannerPeripheral extends BangbooPeripheral {
             results.add(entry);
         }
 
-        int blockR = Math.min(radius, 32);
+        int blockR = Math.min(radius, xylopia.core.Config.SCAN_MAX_BLOCK_RADIUS.get());
         var origin = bangboo.blockPosition();
         var bangbooPos = bangboo.position();
 
@@ -100,7 +97,7 @@ public class ScannerPeripheral extends BangbooPeripheral {
         }
         blockEntries.sort(Comparator.comparingDouble(BlockEntry::distSq));
         for (var entry : blockEntries) {
-            if (results.size() >= 1000) break;
+            if (results.size() >= xylopia.core.Config.SCAN_RESULT_CAP.get()) break;
             var map = new HashMap<String, Object>();
             map.put("type", "block");
             map.put("name", net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(entry.state().getBlock()).toString());
@@ -108,9 +105,6 @@ public class ScannerPeripheral extends BangbooPeripheral {
             results.add(map);
         }
 
-        if (SABLE_LOADED && results.size() < 1000) {
-            SableSubLevelScanner.scan(level, bangboo, blockR, results, 1000);
-        }
         return results;
     }
 }

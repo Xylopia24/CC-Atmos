@@ -1,5 +1,6 @@
 package xylopia.core.entity;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.authlib.GameProfile;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.core.computer.ComputerSide;
@@ -55,21 +56,31 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import xylopia.core.computer.BangbooComputerRegistry;
 import xylopia.core.computer.peripheral.BangbooPeripheralHub;
+import xylopia.core.computer.peripheral.ConfigPeripheral;
 import xylopia.core.item.plugins.AntiGravCoreItem;
 import xylopia.core.item.plugins.BangbooPluginItem;
-import xylopia.core.skin.BangbooSkinDefinition;
-import xylopia.core.skin.BangbooSkinRegistry;
+import xylopia.core.item.plugins.ConfigCoreItem;
 import xylopia.core.menu.BangbooMenu;
 import xylopia.core.registry.AtmosMenus;
+import xylopia.core.skin.BangbooSkinDefinition;
+import xylopia.core.skin.BangbooSkinRegistry;
 
 public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvider {
+    private static final org.slf4j.Logger LOGGER = LogUtils.getLogger();
+    public  static       boolean DEBUG_PATHING   = true;
+
     private static final TerminalSize TERMINAL_SIZE = new TerminalSize(51, 19);
     private static final double INTERACT_RANGE = 8.0;
-    private static final int PATHING_TIMEOUT   = 1200; // 60 s
-    private static final int PROXIMITY_INTERVAL = 10;   // ticks between proximity scans
+    private static int pathingTimeout()   { return xylopia.core.Config.PATH_TIMEOUT_TICKS.get(); }
+    private static int proximityInterval() { return xylopia.core.Config.PROXIMITY_SCAN_INTERVAL_TICKS.get(); }
 
-    private static final EntityDataAccessor<String> SKIN_ID =
+    private static final EntityDataAccessor<String>  SKIN_ID =
             SynchedEntityData.defineId(BangbooEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Integer> ENERGY =
+            SynchedEntityData.defineId(BangbooEntity.class, EntityDataSerializers.INT);
+
+    public  static int maxEnergy()    { return xylopia.core.Config.MAX_ENERGY.get(); }
+    private static int fuelEnergyMult() { return xylopia.core.Config.FUEL_ENERGY_MULT.get(); }
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -113,9 +124,12 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     private double  pathTargetY   = 0;
     private double  pathTargetZ   = 0;
     private net.minecraft.world.phys.Vec3 lastPathPos   = null;
-    private int     stuckTicks      = 0;
-    private boolean finalApproach   = false;
-    private boolean boardingApproach = false;
+    private int     stuckTicks    = 0;
+    private boolean finalApproach = false;
+
+    // ── Energy ────────────────────────────────────────────────────────────────
+    private int     fuelBurnRemaining = 0;
+    private boolean energyLowFired    = false;
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -129,6 +143,16 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(SKIN_ID, "ccatmos:eous");
+        builder.define(ENERGY, maxEnergy());
+    }
+
+    // ── Energy public API ──────────────────────────────────────────────────────
+
+    public int     getEnergy()      { return getEntityData().get(ENERGY); }
+    public boolean isFuelBurning()  { return fuelBurnRemaining > 0; }
+
+    private void setEnergy(int v) {
+        getEntityData().set(ENERGY, Math.max(0, Math.min(maxEnergy(), v)));
     }
 
     // ── GeoEntity ─────────────────────────────────────────────────────────────
@@ -323,12 +347,18 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     // ── Pathing ───────────────────────────────────────────────────────────────
 
     public void startPathing(double x, double y, double z) {
-        pathTargetX = x;
-        pathTargetY = y;
-        pathTargetZ = z;
+        pathTargetX      = x;
+        pathTargetY      = y;
+        pathTargetZ      = z;
+        activePathing  = true;
+        pathingTicks   = 0;
+        stuckTicks     = 0;
+        finalApproach  = false;
+        lastPathPos    = position();
+
+        if (DEBUG_PATHING) LOGGER.info("[Bangboo#{}] startPathing → ({}, {}, {})", bangbooID, x, y, z);
+
         issueNavigation();
-        activePathing = true;
-        pathingTicks  = 0;
     }
 
     public void redirectTo(double x, double y, double z) {
@@ -341,8 +371,10 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     private void issueNavigation() {
         var path = getNavigation().createPath(pathTargetX, pathTargetY, pathTargetZ, 0);
         if (path != null) {
+            if (DEBUG_PATHING) LOGGER.info("[Bangboo#{}] issueNavigation → exact path found", bangbooID);
             getNavigation().moveTo(path, pathingSpeed);
         } else {
+            if (DEBUG_PATHING) LOGGER.info("[Bangboo#{}] issueNavigation → no exact path, using moveTo fallback (accuracy=1)", bangbooID);
             getNavigation().moveTo(pathTargetX, pathTargetY, pathTargetZ, pathingSpeed);
         }
     }
@@ -364,13 +396,14 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
     public void cancelPathing() {
         if (!activePathing) return;
+        if (DEBUG_PATHING) LOGGER.info("[Bangboo#{}] cancelPathing → pos={}", bangbooID,
+                String.format("(%.2f, %.2f, %.2f)", getX(), getY(), getZ()));
         getNavigation().stop();
-        activePathing    = false;
-        pathingTicks     = 0;
-        stuckTicks       = 0;
-        lastPathPos      = null;
-        finalApproach    = false;
-        boardingApproach = false;
+        activePathing = false;
+        pathingTicks  = 0;
+        stuckTicks    = 0;
+        lastPathPos   = null;
+        finalApproach = false;
         if (serverComputer != null) serverComputer.queueEvent("bangboo_path_done", new Object[]{false, "cancelled"});
     }
 
@@ -443,6 +476,7 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
             tickRedstoneOutput(serverLevel);
             tickProximity(serverLevel);
             tickPathing();
+            tickEnergy(serverLevel);
         }
     }
 
@@ -509,7 +543,7 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     }
 
     private void tickProximity(ServerLevel level) {
-        if (++proximityTimer < PROXIMITY_INTERVAL) return;
+        if (++proximityTimer < proximityInterval()) return;
         proximityTimer = 0;
         if (!proximityEnabled || serverComputer == null) return;
         if (!hasPluginProviding(BangbooPluginItem::providesProximity)) return;
@@ -533,29 +567,15 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     private static final double FINAL_APPROACH_SQ      = 2.5  * 2.5;
     private static final double STUCK_MOVE_THRESHOLD_SQ = 0.05 * 0.05;
     private static final int    MAX_STUCK_TICKS         = 20;
-    private static final int    MAX_BOARD_STUCK_TICKS   = 60; // more patience while walking onto ship
-
-    private dev.ryanhcode.sable.sublevel.SubLevel currentSubLevel() {
-        if (this instanceof dev.ryanhcode.sable.mixinterface.entity.entity_sublevel_collision.EntityMovementExtension ext)
-            return ext.sable$getTrackingSubLevel();
-        return null;
-    }
-
-    private boolean targetIsOnSubLevel() {
-        var container = dev.ryanhcode.sable.api.sublevel.SubLevelContainer.getContainer(level());
-        if (container == null) return false;
-        var bbox = new dev.ryanhcode.sable.companion.math.BoundingBox3d(
-                BlockPos.containing(pathTargetX, pathTargetY, pathTargetZ));
-        return container.queryIntersecting(bbox).iterator().hasNext();
-    }
 
     private void finishPathing(boolean success, String reason) {
-        activePathing    = false;
-        pathingTicks     = 0;
-        stuckTicks       = 0;
-        lastPathPos      = null;
-        finalApproach    = false;
-        boardingApproach = false;
+        if (DEBUG_PATHING) LOGGER.info("[Bangboo#{}] finishPathing → ok={} reason={} pos={}",
+                bangbooID, success, reason, String.format("(%.2f, %.2f, %.2f)", getX(), getY(), getZ()));
+        activePathing = false;
+        pathingTicks  = 0;
+        stuckTicks    = 0;
+        lastPathPos   = null;
+        finalApproach = false;
         getNavigation().stop();
         serverComputer.queueEvent("bangboo_path_done", new Object[]{success, reason});
     }
@@ -569,16 +589,74 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
         return (dx*dx + dz*dz) <= ARRIVAL_THRESHOLD_SQ && Math.abs(dy) <= 2.0;
     }
 
+    private boolean hasConfigCore() {
+        return hasPluginProviding(p -> p instanceof ConfigCoreItem);
+    }
+
+    private void tickEnergy(ServerLevel level) {
+        if (!hasConfigCore()) return;
+
+        int current = getEnergy();
+        int drain   = ConfigPeripheral.computeDrain(this);
+        int next    = Math.max(0, current - drain);
+
+        // Refuel from internal inventory if below max
+        int maxE = maxEnergy();
+        if (next < maxE) {
+            if (fuelBurnRemaining > 0) {
+                next = Math.min(maxE, next + fuelEnergyMult());
+                fuelBurnRemaining--;
+            } else {
+                for (int i = 0; i < internalInventory.getContainerSize(); i++) {
+                    var stack = internalInventory.getItem(i);
+                    if (stack.isEmpty()) continue;
+                    @SuppressWarnings("deprecation")
+                    int burnTime = net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity.getFuel()
+                            .getOrDefault(stack.getItem(), 0);
+                    if (burnTime > 0) {
+                        fuelBurnRemaining = burnTime - 1;
+                        next = Math.min(maxE, next + fuelEnergyMult());
+                        internalInventory.removeItem(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Zero crossing — revert stats and notify Lua
+        if (next == 0) {
+            if (ConfigPeripheral.hasModifiedStats(this)) {
+                ConfigPeripheral.resetAllFor(this);
+            }
+            if (current > 0 && serverComputer != null) {
+                serverComputer.queueEvent("bangboo_energy_empty", new Object[0]);
+                energyLowFired = false;
+            }
+        }
+
+        // Low-energy warning — once per crossing below 20%
+        if (next > 0 && next < maxE / 5) {
+            if (!energyLowFired) {
+                energyLowFired = true;
+                if (serverComputer != null)
+                    serverComputer.queueEvent("bangboo_energy_low", new Object[]{next});
+            }
+        } else if (next >= maxE / 5) {
+            energyLowFired = false;
+        }
+
+        setEnergy(next);
+    }
+
     private void tickPathing() {
         if (!activePathing || serverComputer == null) return;
 
-        if (++pathingTicks > PATHING_TIMEOUT) {
+        if (++pathingTicks > pathingTimeout()) {
             finishPathing(false, "timeout");
             return;
         }
 
-        if (boardingApproach) { tickBoardingApproach(); return; }
-        if (finalApproach)    { tickFinalApproach();    return; }
+        if (finalApproach) { tickFinalApproach(); return; }
 
         if (getNavigation().isDone()) {
             if (isArrived()) {
@@ -592,6 +670,7 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
             if (distSq <= FINAL_APPROACH_SQ) {
                 // Vanilla nav stopped short — walk the last stretch directly.
+                if (DEBUG_PATHING) LOGGER.info("[Bangboo#{}] entering finalApproach — distSq={:.3f}", bangbooID, distSq);
                 getNavigation().stop();
                 ((BangbooMoveControl) moveControl).setGroundTarget(
                         pathTargetX, pathTargetY, pathTargetZ, pathingSpeed);
@@ -603,17 +682,7 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
                 var curPos = position();
                 if (lastPathPos != null && curPos.distanceToSqr(lastPathPos) < STUCK_MOVE_THRESHOLD_SQ) {
                     if (++stuckTicks >= MAX_STUCK_TICKS) {
-                        // If the target is on a Sable sublevel, switch to boarding walk.
-                        if (currentSubLevel() == null && targetIsOnSubLevel()) {
-                            getNavigation().stop();
-                            ((BangbooMoveControl) moveControl).setGroundTarget(
-                                    pathTargetX, pathTargetY, pathTargetZ, pathingSpeed);
-                            boardingApproach = true;
-                            stuckTicks = 0;
-                            lastPathPos = curPos;
-                        } else {
-                            finishPathing(false, "stuck");
-                        }
+                        finishPathing(false, "stuck");
                     } else {
                         lastPathPos = curPos;
                     }
@@ -643,29 +712,6 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
                 pathTargetX, pathTargetY, pathTargetZ, pathingSpeed);
     }
 
-    private void tickBoardingApproach() {
-        // Once Sable tracks us to the sublevel, hand back to regular nav.
-        if (currentSubLevel() != null) {
-            boardingApproach = false;
-            stuckTicks = 0;
-            lastPathPos = position();
-            issueNavigation();
-            return;
-        }
-
-        if (isArrived()) { finishPathing(true, "arrived"); return; }
-
-        var curPos = position();
-        if (lastPathPos != null && curPos.distanceToSqr(lastPathPos) < STUCK_MOVE_THRESHOLD_SQ) {
-            if (++stuckTicks >= MAX_BOARD_STUCK_TICKS) { finishPathing(false, "stuck"); return; }
-        } else {
-            stuckTicks = 0;
-        }
-        lastPathPos = curPos;
-        // Walk directly toward the ship — gravity + step-height handle the slabs.
-        ((BangbooMoveControl) moveControl).setGroundTarget(
-                pathTargetX, pathTargetY, pathTargetZ, pathingSpeed);
-    }
 
     @Override
     public void remove(RemovalReason reason) {
@@ -774,6 +820,10 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
         // Cosmetic
         tag.putString("SkinId", getSkinId());
+
+        // Energy
+        tag.putInt("Energy", getEnergy());
+        tag.putInt("FuelBurnRemaining", fuelBurnRemaining);
     }
 
     @Override
@@ -811,5 +861,9 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
         // Cosmetic
         if (tag.contains("SkinId")) setSkinId(tag.getString("SkinId"));
+
+        // Energy
+        if (tag.contains("Energy"))            setEnergy(tag.getInt("Energy"));
+        if (tag.contains("FuelBurnRemaining")) fuelBurnRemaining = tag.getInt("FuelBurnRemaining");
     }
 }

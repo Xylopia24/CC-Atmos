@@ -50,7 +50,7 @@ like a player, not a Turtle.
 - [x] **Cosmetic** — `getSkin()`, `setSkin(id)`, `listSkins()`
 - [x] **Backpack** — full Shulker Box + Sophisticated Backpacks support; `list()`, `pushItem()`, `pullItem()`
 - [x] **Anti-Grav** — `setEnabled()`, `isEnabled()`, `setBobbing()`; immune to fall damage while installed
-- [x] **Config** — `set(name, val)`, `get(name)`, `reset()`, `resetAll()`, `list()` for all entity attributes
+- [x] **Config** — `set(name, val)`, `get(name)`, `reset()`, `resetAll()`, `list()`; energy system: `getEnergy()`, `getMaxEnergy()`, `isBurning()`; fires `bangboo_energy_low` and `bangboo_energy_empty` events
 - [x] **Command** *(creative only)* — `exec(cmd)` → `ok, { lines }`
 
 ### Tiered Cores (all 5 lines implemented)
@@ -76,7 +76,8 @@ like a player, not a Turtle.
 - [x] Anti-grav flight (`FlyingPathNavigation` + direct velocity)
 - [x] Ground final-approach phase — direct `MoveControl` walk for last ~2 blocks, bypasses vanilla nav stopping short
 - [x] Arrival detection — horizontal distance + Y tolerance (entity feet sit above solid block targets)
-- [x] Sable sublevel boarding — detects target on ship, switches to direct-walk boarding approach, resumes nav once tracked to sublevel
+- [x] Navigation 1-block-short bug fixed — root cause was Sable's global pathfinding mixins (`GroundPathNavigationMixin`, `WalkNodeEvaluatorMixin`) corrupting vanilla nav for all entities regardless of ship presence; fixed by removing Sable from the dependency list entirely
+- [ ] Moving-sublevel pathfinding (ship support) — to be revisited in the future without relying on mods that globally patch vanilla pathfinding
 
 ### Polish
 - [x] Name tag — label above head when named
@@ -88,10 +89,10 @@ like a player, not a Turtle.
 
 ## Pending
 
-- [ ] **Energy system** — coal/fuel consumption from internal inventory + Forge Energy integration; Bangboo Charging Dock block. Config Core tooltip already stubs this.
+- [ ] **Forge Energy (FE) integration** — Bangboo Charging Dock block that accepts FE from generator mods and charges a docked Bangboo; feeds into the existing energy system
+- [ ] **Moving-sublevel pathfinding** — navigation on ships/physics platforms; Sable compatibility removed due to global pathfinding corruption (see Navigation section); needs a different approach
 - [ ] **BooBox texture** — user art asset, not blocking anything
-- [ ] **Delete `BangbooCombinedPeripheral.java`** — orphaned file, not used anywhere, safe to remove
-- [ ] **`getHunger()` / `getEffect()`** — originally planned for base API; Bangboo has no hunger so `getEffect()` (active potion effects) is the only one worth adding
+- [ ] **`getEffect()`** — base API; returns active potion effects on the Bangboo (`getHunger()` dropped — Bangboo has no hunger)
 
 ---
 

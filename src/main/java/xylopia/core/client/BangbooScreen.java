@@ -30,11 +30,11 @@ public class BangbooScreen extends AbstractComputerScreen<BangbooMenu> {
         int w = imageWidth;
         int h = imageHeight;
 
-        // ── Main background panel ──────────────────────────────────────────
+        // ── Unified background ─────────────────────────────────────────────
         graphics.fill(x,     y,     x + w,     y + h,     0xFF2B2B2B);
         graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, 0xFF1E1E1E);
 
-        // ── Inset around the terminal area ─────────────────────────────────
+        // ── Terminal inset ─────────────────────────────────────────────────
         int tx = x + BangbooMenu.TERMINAL_X - 2;
         int ty = y + BangbooMenu.TERMINAL_Y - 2;
         int tw = BangbooMenu.TERMINAL_W + 4;
@@ -42,15 +42,12 @@ public class BangbooScreen extends AbstractComputerScreen<BangbooMenu> {
         graphics.fill(tx,     ty,     tx + tw,     ty + th,     0xFF111111);
         graphics.fill(tx + 1, ty + 1, tx + tw - 1, ty + th - 1, 0xFF000000);
 
-        // ── Plug-in slot panel — full-height right column ─────────────────
-        boolean hubActive = menu.isHubActive();
-        int panelX = x + BangbooMenu.PLUGIN_SLOT_X - BangbooMenu.BORDER;
-        int panelY = y;
-        int panelW = 18 + BangbooMenu.BORDER * 2;
-        int panelH = BangbooMenu.IMAGE_HEIGHT;
-        graphics.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xFF1E1E1E);
+        // ── Plugin column reference coords ────────────────────────────────
+        int colX = x + BangbooMenu.PLUGIN_SLOT_X - BangbooMenu.BORDER;
+        int colW = 18 + BangbooMenu.BORDER * 2;
 
-        // ── Individual plug-in slot backgrounds ────────────────────────────
+        // ── Plugin slot backgrounds ────────────────────────────────────────
+        boolean hubActive = menu.isHubActive();
         for (int i = 0; i < BangbooMenu.TOTAL_PLUGIN_COUNT; i++) {
             int sx = x + BangbooMenu.PLUGIN_SLOT_X - 1;
             int sy = y + BangbooMenu.PLUGIN_SLOT_Y0 + i * BangbooMenu.PLUGIN_SPACING - 1;
@@ -72,14 +69,33 @@ public class BangbooScreen extends AbstractComputerScreen<BangbooMenu> {
             graphics.fill(bx + 1, by + 1, bx + 17, by + 17, 0xFF8B8B8B);
         }
 
-        // ── Internal inventory slots (16, 4×4) ────────────────────────────
+        // ── Energy bar (below backpack slot, Config Core only) ────────────
+        if (menu.hasConfigPlugin()) {
+            int barX  = colX + 3;
+            int barW  = colW - 6;
+            int lblY  = y + BangbooMenu.BACKPACK_SLOT_Y + 22;
+            int barY  = lblY + 6;
+            float pct = menu.getEnergyFraction();
+            int fill  = (int)(barW * pct);
+            int color = pct > 0.5f ? 0xFF22CC44 : pct > 0.2f ? 0xFFFFAA00 : 0xFFCC2222;
+            graphics.pose().pushPose();
+            graphics.pose().translate(barX, lblY, 0);
+            graphics.pose().scale(0.5f, 0.5f, 1f);
+            graphics.drawString(font, "ENERGY", 0, 0, 0xFF888888, false);
+            graphics.pose().popPose();
+            graphics.fill(barX,     barY, barX + barW, barY + 5, 0xFF111111);
+            if (fill > 0)
+                graphics.fill(barX, barY, barX + fill, barY + 5, color);
+        }
+
+        // ── Internal inventory slots ───────────────────────────────────────
         if (menu.hasInventoryPlugin()) {
             renderInternalInventorySlots(graphics, x, y);
         }
 
-        // ── Player inventory slots (3×9 main + hotbar) ─────────────────────
-        renderInventorySlots(graphics, x, y, false);  // main inventory
-        renderInventorySlots(graphics, x, y, true);   // hotbar
+        // ── Player inventory slots ─────────────────────────────────────────
+        renderInventorySlots(graphics, x, y, false);
+        renderInventorySlots(graphics, x, y, true);
     }
 
     private void renderInternalInventorySlots(GuiGraphics graphics, int x, int y) {

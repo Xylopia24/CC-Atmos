@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import xylopia.core.backpack.BackpackAccessors;
 import xylopia.core.entity.BangbooEntity;
 import xylopia.core.item.plugins.BangbooPluginItem;
+import xylopia.core.item.plugins.ConfigCoreItem;
 import xylopia.core.item.plugins.PluginHubItem;
 
 import java.util.function.Predicate;
@@ -55,6 +56,7 @@ public class BangbooMenu extends ComputerMenuWithoutInventory {
     private int intInvSlotOffset;
     private int backpackSlotOffset;
     private int invSlotOffset;
+    private int syncedEnergyPermille = 0;
 
     // ── Server constructor ────────────────────────────────────────────────
     public BangbooMenu(MenuType<? extends AbstractComputerMenu> type, int id, Inventory inventory,
@@ -69,6 +71,7 @@ public class BangbooMenu extends ComputerMenuWithoutInventory {
         addInternalInventorySlots();
         addBackpackSlot();
         addInventorySlots(inventory);
+        addEnergyData();
     }
 
     // ── Client constructor (called via IContainerFactory) ─────────────────
@@ -83,7 +86,27 @@ public class BangbooMenu extends ComputerMenuWithoutInventory {
         addInternalInventorySlots();
         addBackpackSlot();
         addInventorySlots(inventory);
+        addEnergyData();
     }
+
+    private void addEnergyData() {
+        addDataSlots(new net.minecraft.world.inventory.ContainerData() {
+            @Override public int get(int i) {
+                return (i == 0 && entity != null) ? entity.getEnergy() * 1000 / BangbooEntity.maxEnergy() : 0;
+            }
+            @Override public void set(int i, int v) { if (i == 0) syncedEnergyPermille = v; }
+            @Override public int getCount() { return 1; }
+        });
+    }
+
+    public boolean hasConfigPlugin() {
+        for (int i = 0; i < TOTAL_PLUGIN_COUNT; i++) {
+            if (pluginContainer.getItem(i).getItem() instanceof ConfigCoreItem) return true;
+        }
+        return false;
+    }
+
+    public float getEnergyFraction() { return syncedEnergyPermille / 1000f; }
 
     /** True if a Plug-In Hub occupies any base slot. */
     public boolean isHubActive() {

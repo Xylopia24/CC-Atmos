@@ -1,10 +1,8 @@
--- bangboo  - Command-line control for your Bangboo's built-in API.
--- Only works on a Bangboo computer (where the 'bangboo' global is present).
---
+-- bangboo: basic control for your Bangboo from the built-in terminal.
 -- Usage: bangboo <command> [args...]
 
 if not bangboo then
-    print("This program only works on a Bangboo computer.")
+    print("This program only runs on a Bangboo computer.")
     return
 end
 
@@ -14,18 +12,16 @@ local cmd  = args[1]
 local function usage()
     print("Usage: bangboo <command> [args]")
     print("")
-    print("  info           Name, ID, health, position")
-    print("  name           Show current name")
-    print("  name <text>    Set a new name (spaces allowed)")
-    print("  pos            Current position and facing")
-    print("  health         Health with percentage")
-    print("  face <yaw>     Set facing (0=S 90=W 180=N 270=E)")
-    print("  stop           Stop any current movement")
-    print("  scan           Basic surroundings summary")
-    print("  help           Show this message")
+    print("  info              Name, ID, health, position")
+    print("  name              Show current name")
+    print("  name <text>       Set a new name")
+    print("  pos               Position and facing")
+    print("  health            Health with percentage bar")
+    print("  face <yaw>        Set facing (0=S 90=W 180=N 270=E)")
+    print("  stop              Cancel current movement")
+    print("  scan              Nearby entity summary")
+    print("  help              Show this message")
 end
-
--- ── Commands ──────────────────────────────────────────────────────────────────
 
 if cmd == nil or cmd == "help" then
     usage()
@@ -34,12 +30,14 @@ elseif cmd == "info" then
     local pos   = bangboo.getPos()
     local hp    = bangboo.getHealth()
     local maxHp = bangboo.getMaxHealth()
-    print("Name   : " .. bangboo.getName())
+    local name  = bangboo.getName()
+    print("Name   : " .. (name ~= "" and name or "(unnamed)"))
     print("ID     : " .. bangboo.getID())
     print(("Health : %.1f / %.1f"):format(hp, maxHp))
     print(("Pos    : %.1f, %.1f, %.1f"):format(pos.x, pos.y, pos.z))
     print(("Facing : %.0f deg"):format(pos.yaw))
     print("Ground : " .. tostring(bangboo.isOnGround()))
+    print("Moving : " .. tostring(bangboo.isMoving()))
 
 elseif cmd == "name" then
     if args[2] then
@@ -47,7 +45,8 @@ elseif cmd == "name" then
         bangboo.setName(name)
         print("Name set to: " .. name)
     else
-        print(bangboo.getName())
+        local name = bangboo.getName()
+        print(name ~= "" and name or "(unnamed)")
     end
 
 elseif cmd == "pos" then
@@ -58,7 +57,10 @@ elseif cmd == "pos" then
 elseif cmd == "health" then
     local hp  = bangboo.getHealth()
     local max = bangboo.getMaxHealth()
-    print(("%.1f / %.1f  (%d%%)"):format(hp, max, math.floor(hp / max * 100)))
+    local pct = math.floor(hp / max * 100)
+    local bar = math.floor(pct / 5)
+    print(("%.1f / %.1f  (%d%%)"):format(hp, max, pct))
+    print("[" .. string.rep("|", bar) .. string.rep(" ", 20 - bar) .. "]")
 
 elseif cmd == "face" then
     local yaw = tonumber(args[2])

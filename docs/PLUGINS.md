@@ -775,21 +775,20 @@ bangboo.moveTo(pos.x, pos.y + 10, pos.z)
 ### Configuration Core
 **Item:** `config_core` | **Peripheral type:** `config`
 
-Exposes all Bangboo attributes for direct Lua control. Stats reset to defaults when the core is removed. `set()` changes the **base value** — other modifiers (e.g. Reinforcement Plug-In's +10 health) stack on top unchanged.
+Exposes all Bangboo attributes for direct Lua control and manages the Bangboo's energy system. Stats reset to defaults when the core is removed. `set()` changes the **base value** — other modifiers (e.g. Reinforcement Plug-In's +10 health) stack on top unchanged.
 
-> **Future — Power System:** The Configuration Core will consume Bangboo power proportional to how far stats deviate from defaults. Power sources planned:
-> - **Coal/fuel consumption** — the Bangboo burns fuel from its internal inventory over time
-> - **Forge Energy (FE) integration** — a future "Bangboo Charging Dock" block will accept FE from any compatible generator mod and charge a Bangboo that docks with it
->
-> For now the power cost is stubbed — all stat changes are free.
+**Energy system:** The Config Core requires fuel to operate. Fuel items (coal, wood planks, etc. — anything accepted by a vanilla furnace) are consumed from the Bangboo's internal inventory. Energy drains faster the more stats are overclocked above their defaults. When energy hits zero, all stat overclocks revert automatically and `bangboo_energy_empty` fires. `set()` throws if called with no energy.
 
 | Method | Returns | Description |
 |---|---|---|
-| `set(name, value)` | — | Set a stat's base value |
+| `set(name, value)` | — | Set a stat's base value (throws if energy = 0) |
 | `get(name)` | `number` | Get a stat's current base value |
 | `reset(name)` | — | Reset one stat to its default |
 | `resetAll()` | — | Reset all stats to defaults |
 | `list()` | `table` | All stats: `{ value, default, min, max }` per entry |
+| `getEnergy()` | `number` | Current energy level (0–50000) |
+| `getMaxEnergy()` | `number` | Maximum energy (always 50000) |
+| `isBurning()` | `boolean` | True if a fuel item is currently being consumed |
 
 **Configurable stats:**
 
@@ -810,12 +809,18 @@ Exposes all Bangboo attributes for direct Lua control. Stats reset to defaults w
 ```lua
 local cfg = peripheral.find("config")
 
+-- Check energy before overclocking
+print("Energy: " .. cfg.getEnergy() .. " / " .. cfg.getMaxEnergy())
+if not cfg.isBurning() then
+    print("Warning: no fuel burning — add coal to internal inventory")
+end
+
 -- Print current stat sheet
 for name, data in pairs(cfg.list()) do
     print(name .. ": " .. data.value .. " (default " .. data.default .. ")")
 end
 
--- Tank build
+-- Tank build (throws if energy = 0)
 cfg.set("max_health", 80)
 cfg.set("armor", 15)
 cfg.set("knockback_resistance", 0.8)
@@ -823,6 +828,20 @@ cfg.set("knockback_resistance", 0.8)
 -- Undo one change, or wipe all
 cfg.reset("armor")
 cfg.resetAll()
+```
+
+**Energy event listener:**
+```lua
+-- React to low / empty energy
+while true do
+    local ev, arg = os.pullEvent()
+    if ev == "bangboo_energy_low" then
+        print("Energy low! " .. tostring(arg) .. " remaining — add fuel!")
+    elseif ev == "bangboo_energy_empty" then
+        print("Out of energy. Overclocks have been reset.")
+        break
+    end
+end
 ```
 
 ---
@@ -867,6 +886,8 @@ Events fired by plug-ins that your Lua scripts can listen to with `os.pullEvent(
 | `proximity_leave` | `name (string)` | Proximity — entity left radius |
 | `modem_message` | `side, channel, replyChannel, message, distance` | Wireless — incoming message |
 | `chat_message` | `playerName (string), message (string)` | Language — player sent public chat |
+| `bangboo_energy_low` | `remaining (number)` | Config Core — energy dropped below 20% (fires once per drop; resets when recharged above 20%) |
+| `bangboo_energy_empty` | *(none)* | Config Core — energy hit zero; all overclocks have been reset |
 | `peripheral` | `name (string)` | Any plug-in installed at runtime |
 | `peripheral_detach` | `name (string)` | Any plug-in removed at runtime |
 

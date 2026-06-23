@@ -4,6 +4,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import xylopia.core.entity.BangbooEntity;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,17 +43,19 @@ public class ConfigPeripheral extends BangbooPeripheral {
      */
     @LuaFunction(mainThread = true)
     public final void set(String stat, double value) throws LuaException {
+        var b = requireBangboo();
+        if (b.getEnergy() <= 0)
+            throw new LuaException("Cannot overclock: no energy. Add fuel to the internal inventory.");
         var spec = requireSpec(stat);
         if (value < spec.min() || value > spec.max())
             throw new LuaException(stat + " must be between " + spec.min() + " and " + spec.max());
-        var instance = requireBangboo().getAttribute(spec.holder());
+        var instance = b.getAttribute(spec.holder());
         if (instance == null) throw new LuaException(stat + " is not available on this Bangboo");
 
         instance.setBaseValue(value);
 
         // Clamp current health if max_health was lowered
         if (stat.equals("max_health")) {
-            var b = requireBangboo();
             if (b.getHealth() > b.getMaxHealth()) b.setHealth(b.getMaxHealth());
         }
     }
@@ -129,11 +132,63 @@ public class ConfigPeripheral extends BangbooPeripheral {
         return spec;
     }
 
-    public static void resetAllFor(xylopia.core.entity.BangbooEntity bangboo) {
+    public static void resetAllFor(BangbooEntity bangboo) {
         for (var spec : SPECS.values()) {
             var instance = bangboo.getAttribute(spec.holder());
             if (instance != null) instance.setBaseValue(spec.defaultValue());
         }
         if (bangboo.getHealth() > bangboo.getMaxHealth()) bangboo.setHealth(bangboo.getMaxHealth());
+    }
+
+    public static boolean hasModifiedStats(BangbooEntity bangboo) {
+        for (var e : SPECS.entrySet()) {
+            var instance = bangboo.getAttribute(e.getValue().holder());
+            if (instance == null) continue;
+            if (Math.abs(instance.getBaseValue() - e.getValue().defaultValue()) > 0.001) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Energy drain per tick while Config Core is installed.
+     * Base cost = 1. Each overclocked attribute adds floor(current/default) extra.
+     * Zero-default attributes (armor etc.) use floor(value/max * 5) instead.
+     */
+    public static int computeDrain(BangbooEntity bangboo) {
+        int drain = 1; // base cost while core is installed
+        for (var e : SPECS.entrySet()) {
+            var spec     = e.getValue();
+            var instance = bangboo.getAttribute(spec.holder());
+            if (instance == null) continue;
+            double cur = instance.getBaseValue();
+            double def = spec.defaultValue();
+            if (def > 0.001) {
+                // Only drain for overclock (above default)
+                if (cur > def + 0.001)
+                    drain += (int) Math.max(1, Math.floor(cur / def));
+            } else {
+                // Zero-default attribute: scale by fraction of max, up to 5/tick
+                if (cur > 0.001)
+                    drain += (int) Math.max(1, Math.ceil(cur / spec.max() * 5));
+            }
+        }
+        return drain;
+    }
+
+    // ── Energy Lua API ────────────────────────────────────────────────────────
+
+    @LuaFunction(mainThread = true)
+    public final int getEnergy() throws LuaException {
+        return requireBangboo().getEnergy();
+    }
+
+    @LuaFunction
+    public final int getMaxEnergy() {
+        return BangbooEntity.maxEnergy();
+    }
+
+    @LuaFunction(mainThread = true)
+    public final boolean isBurning() throws LuaException {
+        return requireBangboo().isFuelBurning();
     }
 }

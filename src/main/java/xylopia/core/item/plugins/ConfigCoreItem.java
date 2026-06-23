@@ -29,6 +29,9 @@ public class ConfigCoreItem extends BangbooPluginItem {
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("tooltip.ccatmos.config_core.desc").withStyle(ChatFormatting.GRAY));
-        // TODO: show power draw once energy system is implemented
+        tooltip.add(Component.literal("Consumes fuel from internal inventory to overclock stats.")
+                .withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.literal("Higher overclock = faster fuel drain.")
+                .withStyle(ChatFormatting.DARK_GRAY));
     }
 }

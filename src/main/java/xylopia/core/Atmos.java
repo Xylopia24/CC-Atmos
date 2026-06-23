@@ -6,6 +6,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -27,6 +28,8 @@ public class Atmos {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Atmos(IEventBus modEventBus, ModContainer modContainer) {
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+
         // Base Lua API (always present on every Bangboo computer)
         ComputerCraftAPI.registerAPIFactory(new BangbooLuaAPIFactory());
 

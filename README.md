@@ -56,12 +56,14 @@ Bangboo skins are data-pack driven — drop a JSON into `data/<namespace>/bangbo
 |-----|---------|------|
 | [CC: Tweaked](https://modrinth.com/mod/cc-tweaked) | 1.119.0 | Required |
 | [GeckoLib](https://modrinth.com/mod/geckolib) | 4.8.4 | Required |
-| [Sable](https://modrinth.com/mod/sable) | 2.0.3 | Optional — enables ship boarding & sublevel pathfinding |
-| Sable Companion Common | 1.6.0 | Optional — required if using Sable |
-| [Create](https://modrinth.com/mod/create) | 6.0.10 | Optional |
-| [Create Aeronautics](https://github.com/createmod/create-aeronautics) | 1.3.0 | Optional — addon for Sable |
 | [Sophisticated Backpacks](https://modrinth.com/mod/sophisticated-backpacks) | — | Optional — enables Backpack Plug-in |
 | Sophisticated Core | — | Optional — required if using Sophisticated Backpacks |
+
+### A note on physics mod compatibility (Sable / Create Aeronautics)
+
+Compatibility with Sable and Create Aeronautics was explored but ultimately removed. Sable injects global mixins into vanilla pathfinding (`GroundPathNavigationMixin`, `WalkNodeEvaluatorMixin`, `PathNavigationMixin`) that affect **all** entities — not just those on ships. Having the Sable JARs on the classpath caused the Bangboo's navigation to stop 1 block short of every target, even in a world with no ships at all.
+
+Navigation on moving sublevels is something we'd like to revisit in the future.
 
 ---
 
