@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IPI",
+    "PAP",
+    "IPI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "P": { "item": "minecraft:piston" },
+    "A": { "item": "ccatmos:advanced_blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:field_core_mk1",
+    "count": 1
+  }
+}

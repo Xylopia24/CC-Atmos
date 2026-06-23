@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "HCH",
+    "CMC",
+    "HCH"
+  ],
+  "key": {
+    "H": { "item": "minecraft:hopper" },
+    "C": { "item": "minecraft:chest" },
+    "M": { "item": "ccatmos:field_core_mk2" }
+  },
+  "result": {
+    "id": "ccatmos:field_core_mk3",
+    "count": 1
+  }
+}

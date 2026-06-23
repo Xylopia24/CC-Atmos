@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "ABA",
+    "CRC"
+  ],
+  "key": {
+    "C": { "item": "minecraft:copper_ingot" },
+    "A": { "item": "minecraft:amethyst_shard" },
+    "B": { "item": "ccatmos:blank_cartridge" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": {
+    "id": "ccatmos:advanced_blank_cartridge",
+    "count": 1
+  }
+}

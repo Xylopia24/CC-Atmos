@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ISI",
+    "SAS",
+    "ISI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "S": { "item": "minecraft:spyglass" },
+    "A": { "item": "ccatmos:advanced_blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:sensor_core_mk1",
+    "count": 1
+  }
+}

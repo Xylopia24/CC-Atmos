@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IMI",
+    "MBM",
+    "IMI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "M": { "item": "minecraft:map" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:compass_plugin",
+    "count": 1
+  }
+}

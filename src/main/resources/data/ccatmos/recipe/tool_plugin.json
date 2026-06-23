@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IPI",
+    "IBI",
+    "III"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "P": { "item": "minecraft:piston" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:tool_plugin",
+    "count": 1
+  }
+}

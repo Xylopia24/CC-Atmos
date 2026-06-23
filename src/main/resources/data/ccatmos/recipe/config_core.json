@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DGD",
+    "CAC",
+    "DGD"
+  ],
+  "key": {
+    "D": { "item": "minecraft:diamond" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "C": { "item": "minecraft:comparator" },
+    "A": { "item": "ccatmos:advanced_blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:config_core",
+    "count": 1
+  }
+}

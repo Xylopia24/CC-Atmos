@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GWG",
+    "WBW",
+    "GWG"
+  ],
+  "key": {
+    "G": { "item": "minecraft:gold_nugget" },
+    "W": { "item": "computercraft:wireless_modem_normal" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:wireless_plugin",
+    "count": 1
+  }
+}

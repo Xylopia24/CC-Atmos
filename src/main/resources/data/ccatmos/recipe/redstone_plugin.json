@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IRI",
+    "RBR",
+    "IOI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "R": { "item": "minecraft:redstone" },
+    "O": { "item": "minecraft:observer" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:redstone_plugin",
+    "count": 1
+  }
+}

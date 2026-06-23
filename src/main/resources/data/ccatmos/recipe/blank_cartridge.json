@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "IGI",
+    "RIR"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "G": { "item": "minecraft:gold_nugget" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": {
+    "id": "ccatmos:blank_cartridge",
+    "count": 1
+  }
+}

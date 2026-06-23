@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "INI",
+    "NBS",
+    "INI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "N": { "item": "minecraft:note_block" },
+    "B": { "item": "ccatmos:blank_cartridge" },
+    "S": { "item": "computercraft:speaker" }
+  },
+  "result": {
+    "id": "ccatmos:speaker_plugin",
+    "count": 1
+  }
+}

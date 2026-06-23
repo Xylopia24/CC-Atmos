@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TIT",
+    "IMI",
+    "TIT"
+  ],
+  "key": {
+    "T": { "item": "minecraft:tripwire_hook" },
+    "I": { "item": "minecraft:iron_nugget" },
+    "M": { "item": "ccatmos:sensor_core_mk1" }
+  },
+  "result": {
+    "id": "ccatmos:sensor_core_mk2",
+    "count": 1
+  }
+}

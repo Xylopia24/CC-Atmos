@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NIN",
+    "IMI",
+    "NIN"
+  ],
+  "key": {
+    "N": { "item": "minecraft:note_block" },
+    "I": { "item": "minecraft:iron_nugget" },
+    "M": { "item": "ccatmos:comms_core_mk2" }
+  },
+  "result": {
+    "id": "ccatmos:comms_core_mk3",
+    "count": 1
+  }
+}

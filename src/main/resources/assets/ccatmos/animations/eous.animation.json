@@ -1,0 +1,110 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+
+		"animation.bangboo.idle": {
+			"loop": true,
+			"bones": {
+				"Bangoo": {
+					"position": [0, "math.sin(q.anim_time * 180) * 0.5", 0]
+				},
+				"LeftEar": {
+					"rotation": [0, 0, "math.sin(q.anim_time * 150 + 30) * 6"]
+				},
+				"RightEar": {
+					"rotation": [0, 0, "math.sin(q.anim_time * 150 + 210) * 6"]
+				},
+				"Tail": {
+					"rotation": ["math.sin(q.anim_time * 120) * 3", 0, 0]
+				},
+				"Scarf": {
+					"rotation": ["math.sin(q.anim_time * 120) * 2", 0, 0]
+				},
+				"ScarfBit": {
+					"rotation": ["math.sin(q.anim_time * 120 + 40) * 3", 0, 0]
+				},
+				"LeftArm": {
+					"rotation": [0, 0, "math.sin(q.anim_time * 150) * 4"]
+				},
+				"RightArm": {
+					"rotation": [0, 0, "math.sin(q.anim_time * 150 + 180) * 4"]
+				}
+			}
+		},
+
+		"animation.bangboo.walk": {
+			"loop": true,
+			"bones": {
+				"Bangoo": {
+					"position": [0, "math.abs(math.sin(q.anim_time * 600)) * -0.4", 0],
+					"rotation": ["math.sin(q.anim_time * 600) * 2", 0, 0]
+				},
+				"LeftLeg": {
+					"rotation": ["math.sin(q.anim_time * 600) * 30", 0, 0]
+				},
+				"RightLeg": {
+					"rotation": ["math.sin(q.anim_time * 600 + 180) * 30", 0, 0]
+				},
+				"LeftArm": {
+					"rotation": ["math.sin(q.anim_time * 600 + 180) * 20", 0, 0]
+				},
+				"RightArm": {
+					"rotation": ["math.sin(q.anim_time * 600) * 20", 0, 0]
+				},
+				"LeftEar": {
+					"rotation": [0, 0, "math.sin(q.anim_time * 600) * 8"]
+				},
+				"RightEar": {
+					"rotation": [0, 0, "math.sin(q.anim_time * 600 + 180) * 8"]
+				},
+				"Tail": {
+					"rotation": ["math.sin(q.anim_time * 600) * 5", 0, 0]
+				},
+				"Scarf": {
+					"rotation": ["-5 + math.sin(q.anim_time * 600) * 3", 0, 0]
+				},
+				"ScarfBit": {
+					"rotation": ["-8 + math.sin(q.anim_time * 600 + 45) * 4", 0, 0]
+				}
+			}
+		},
+
+		"animation.bangboo.happy": {
+			"loop": false,
+			"animation_length": 1.0,
+			"bones": {
+				"TailSpin": {
+					"rotation": [0, "q.anim_time * 1440", 0]
+				},
+				"Bangoo": {
+					"position": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 2, 0],
+						"0.5": [0, 0, 0],
+						"0.75": [0, 2, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"LeftEar": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, -15],
+						"0.5": [0, 0, 0],
+						"0.75": [0, 0, -15],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"RightEar": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, 15],
+						"0.5": [0, 0, 0],
+						"0.75": [0, 0, 15],
+						"1.0": [0, 0, 0]
+					}
+				}
+			}
+		}
+
+	}
+}

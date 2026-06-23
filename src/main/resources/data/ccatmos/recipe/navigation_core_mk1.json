@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IMI",
+    "CAC",
+    "IMI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "M": { "item": "minecraft:map" },
+    "C": { "item": "minecraft:compass" },
+    "A": { "item": "ccatmos:advanced_blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:navigation_core_mk1",
+    "count": 1
+  }
+}

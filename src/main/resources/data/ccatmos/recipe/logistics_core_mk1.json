@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ICI",
+    "CAC",
+    "ICI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "C": { "item": "minecraft:chest" },
+    "A": { "item": "ccatmos:advanced_blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:logistics_core_mk1",
+    "count": 1
+  }
+}

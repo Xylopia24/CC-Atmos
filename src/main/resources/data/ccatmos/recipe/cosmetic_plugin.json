@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GIG",
+    "IBI",
+    "GIG"
+  ],
+  "key": {
+    "G": { "item": "minecraft:glass" },
+    "I": { "item": "minecraft:ink_sac" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:cosmetic_plugin",
+    "count": 1
+  }
+}

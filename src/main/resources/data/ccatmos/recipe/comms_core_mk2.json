@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BIB",
+    "IMI",
+    "BIB"
+  ],
+  "key": {
+    "B": { "item": "minecraft:book" },
+    "I": { "item": "minecraft:iron_nugget" },
+    "M": { "item": "ccatmos:comms_core_mk1" }
+  },
+  "result": {
+    "id": "ccatmos:comms_core_mk2",
+    "count": 1
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "geo": "ccatmos:geo/eyebot.geo.json",
+  "texture": "ccatmos:textures/entity/skins/eyebot.png",
+  "animation": "ccatmos:animations/eyebot.animation.json",
+  "animations": {
+    "idle": {
+      "base": "idle",
+      "variants": [
+        {
+          "name": "idle2",
+          "weight": 1,
+          "loop": false,
+          "min_interval": 15,
+          "max_interval": 45,
+          "duration": 2.5
+        }
+      ]
+    }
+  }
+}

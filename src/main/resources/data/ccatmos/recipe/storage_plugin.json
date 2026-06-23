@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "INI",
+    "HBH",
+    "INI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_nugget" },
+    "N": { "item": "minecraft:iron_ingot" },
+    "H": { "item": "minecraft:hopper" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:storage_plugin",
+    "count": 1
+  }
+}

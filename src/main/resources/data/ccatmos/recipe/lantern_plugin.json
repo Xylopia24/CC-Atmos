@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "LBL",
+    "GGG"
+  ],
+  "key": {
+    "G": { "item": "minecraft:glowstone_dust" },
+    "L": { "item": "minecraft:lantern" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:lantern_plugin",
+    "count": 1
+  }
+}

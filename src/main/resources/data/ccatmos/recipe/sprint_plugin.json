@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FSF",
+    "SBS",
+    "FSF"
+  ],
+  "key": {
+    "F": { "item": "minecraft:feather" },
+    "S": { "item": "minecraft:sugar" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:sprint_plugin",
+    "count": 1
+  }
+}

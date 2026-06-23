@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GSG",
+    "GBG"
+  ],
+  "key": {
+    "G": { "item": "minecraft:glass_pane" },
+    "S": { "item": "minecraft:spyglass" },
+    "B": { "item": "ccatmos:blank_cartridge" }
+  },
+  "result": {
+    "id": "ccatmos:scanner_plugin",
+    "count": 1
+  }
+}

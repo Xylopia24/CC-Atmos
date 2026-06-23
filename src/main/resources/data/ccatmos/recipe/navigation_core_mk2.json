@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SIS",
+    "TMT",
+    "SIS"
+  ],
+  "key": {
+    "S": { "item": "minecraft:spyglass" },
+    "I": { "item": "minecraft:iron_nugget" },
+    "T": { "item": "minecraft:tripwire_hook" },
+    "M": { "item": "ccatmos:navigation_core_mk1" }
+  },
+  "result": {
+    "id": "ccatmos:navigation_core_mk2",
+    "count": 1
+  }
+}
