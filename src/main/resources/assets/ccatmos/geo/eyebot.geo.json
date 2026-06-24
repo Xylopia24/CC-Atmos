@@ -12,7 +12,7 @@
 			},
 			"bones": [
 				{
-					"name": "root",
+					"name": "Eyebot",
 					"pivot": [0, 4, 0],
 					"cubes": [
 						{
@@ -42,8 +42,8 @@
 					]
 				},
 				{
-					"name": "bone",
-					"parent": "root",
+					"name": "TopLeftHeadAntenae",
+					"parent": "Eyebot",
 					"pivot": [3, 10, -1],
 					"cubes": [
 						{
@@ -57,7 +57,14 @@
 								"up": {"uv": [34, 12], "uv_size": [2, 2]},
 								"down": {"uv": [34, 16], "uv_size": [2, -2]}
 							}
-						},
+						}
+					]
+				},
+				{
+					"name": "TopLeftHeadAntenaePart",
+					"parent": "TopLeftHeadAntenae",
+					"pivot": [3, 11, -1],
+					"cubes": [
 						{
 							"origin": [3, 10.75, -1.5],
 							"size": [0, 12, 1],
@@ -74,8 +81,8 @@
 					]
 				},
 				{
-					"name": "bone5",
-					"parent": "root",
+					"name": "LeftSideBottomAntenae",
+					"parent": "Eyebot",
 					"pivot": [5, 2, -1],
 					"rotation": [0, 0, 90],
 					"cubes": [
@@ -90,7 +97,14 @@
 								"up": {"uv": [34, 16], "uv_size": [2, 2]},
 								"down": {"uv": [34, 20], "uv_size": [2, -2]}
 							}
-						},
+						}
+					]
+				},
+				{
+					"name": "LeftSideBottomAntenaePart",
+					"parent": "LeftSideBottomAntenae",
+					"pivot": [5, 3, -1],
+					"cubes": [
 						{
 							"origin": [5, 2.75, -1.5],
 							"size": [0, 12, 1],
@@ -107,8 +121,8 @@
 					]
 				},
 				{
-					"name": "bone8",
-					"parent": "root",
+					"name": "LeftSideTopAntenae",
+					"parent": "Eyebot",
 					"pivot": [5, 4, -1],
 					"rotation": [0, 0, 90],
 					"cubes": [
@@ -123,7 +137,14 @@
 								"up": {"uv": [36, 0], "uv_size": [2, 2]},
 								"down": {"uv": [36, 4], "uv_size": [2, -2]}
 							}
-						},
+						}
+					]
+				},
+				{
+					"name": "LeftSideTopAntenaePart",
+					"parent": "LeftSideTopAntenae",
+					"pivot": [5, 5, -1],
+					"cubes": [
 						{
 							"origin": [5, 4.75, -1.5],
 							"size": [0, 11, 1],
@@ -140,8 +161,8 @@
 					]
 				},
 				{
-					"name": "bone2",
-					"parent": "root",
+					"name": "TopCenterHeadAntenae",
+					"parent": "Eyebot",
 					"pivot": [0, 11, -2],
 					"cubes": [
 						{
@@ -159,8 +180,8 @@
 					]
 				},
 				{
-					"name": "bone4",
-					"parent": "bone2",
+					"name": "TopCenterAntenaePart",
+					"parent": "TopCenterHeadAntenae",
 					"pivot": [0, 11, -3],
 					"rotation": [-22.5, 0, 0],
 					"cubes": [
@@ -195,8 +216,8 @@
 					]
 				},
 				{
-					"name": "bone11",
-					"parent": "root",
+					"name": "BottomCenterAntenae",
+					"parent": "Eyebot",
 					"pivot": [0, -1, -2],
 					"rotation": [0, 0, -180],
 					"cubes": [
@@ -215,8 +236,8 @@
 					]
 				},
 				{
-					"name": "bone12",
-					"parent": "bone11",
+					"name": "BottomCenterAntenaePart",
+					"parent": "BottomCenterAntenae",
 					"pivot": [0, -1, -3],
 					"rotation": [-22.5, 0, 0],
 					"cubes": [
@@ -251,8 +272,8 @@
 					]
 				},
 				{
-					"name": "bone3",
-					"parent": "root",
+					"name": "RightSideTopAntenae",
+					"parent": "Eyebot",
 					"pivot": [-5, 4, -1],
 					"rotation": [0, 0, -90],
 					"cubes": [
@@ -267,7 +288,14 @@
 								"up": {"uv": [36, 5], "uv_size": [2, 2]},
 								"down": {"uv": [36, 9], "uv_size": [2, -2]}
 							}
-						},
+						}
+					]
+				},
+				{
+					"name": "RightSideTopAntenaePart",
+					"parent": "RightSideTopAntenae",
+					"pivot": [-5, 5, -1],
+					"cubes": [
 						{
 							"origin": [-5, 4.75, -1.5],
 							"size": [0, 11, 1],
@@ -284,23 +312,10 @@
 					]
 				},
 				{
-					"name": "bone7",
-					"parent": "root",
+					"name": "TopRightHeadAntenae",
+					"parent": "Eyebot",
 					"pivot": [-3, 10, -1],
 					"cubes": [
-						{
-							"origin": [-3, 10.75, -1.5],
-							"size": [0, 12, 1],
-							"pivot": [-3, 10.75, -1],
-							"rotation": [-45, 0, 0],
-							"uv": {
-								"north": {"uv": [0, 0], "uv_size": [0, 12]},
-								"south": {"uv": [0, 0], "uv_size": [0, 12]},
-								"west": {"uv": [30, 32], "uv_size": [1, 12]},
-								"up": {"uv": [0, 0], "uv_size": [0, 1]},
-								"down": {"uv": [0, 1], "uv_size": [0, -1]}
-							}
-						},
 						{
 							"origin": [-4, 10, -2],
 							"size": [2, 1, 2],
@@ -316,24 +331,31 @@
 					]
 				},
 				{
-					"name": "bone10",
-					"parent": "root",
-					"pivot": [-5, 2, -1],
-					"rotation": [0, 0, -90],
+					"name": "TopRightHeadAntenaePart",
+					"parent": "TopRightHeadAntenae",
+					"pivot": [-3, 11, -1],
 					"cubes": [
 						{
-							"origin": [-5, 2.75, -1.5],
+							"origin": [-3, 10.75, -1.5],
 							"size": [0, 12, 1],
-							"pivot": [-5, 2.75, -1],
-							"rotation": [-67.5, 0, 0],
+							"pivot": [-3, 10.75, -1],
+							"rotation": [-45, 0, 0],
 							"uv": {
 								"north": {"uv": [0, 0], "uv_size": [0, 12]},
 								"south": {"uv": [0, 0], "uv_size": [0, 12]},
-								"west": {"uv": [33, 0], "uv_size": [1, 12]},
+								"west": {"uv": [30, 32], "uv_size": [1, 12]},
 								"up": {"uv": [0, 0], "uv_size": [0, 1]},
 								"down": {"uv": [0, 1], "uv_size": [0, -1]}
 							}
-						},
+						}
+					]
+				},
+				{
+					"name": "RightSideBottomAntenae",
+					"parent": "Eyebot",
+					"pivot": [-5, 2, -1],
+					"rotation": [0, 0, -90],
+					"cubes": [
 						{
 							"origin": [-6, 2, -2],
 							"size": [2, 1, 2],
@@ -349,28 +371,55 @@
 					]
 				},
 				{
-					"name": "bone6",
-					"parent": "root",
+					"name": "RightSideBottomAntenaePart",
+					"parent": "RightSideBottomAntenae",
+					"pivot": [-5, 2, -1],
+					"cubes": [
+						{
+							"origin": [-5, 2.75, -1.5],
+							"size": [0, 12, 1],
+							"pivot": [-5, 2.75, -1],
+							"rotation": [-67.5, 0, 0],
+							"uv": {
+								"north": {"uv": [0, 0], "uv_size": [0, 12]},
+								"south": {"uv": [0, 0], "uv_size": [0, 12]},
+								"west": {"uv": [33, 0], "uv_size": [1, 12]},
+								"up": {"uv": [0, 0], "uv_size": [0, 1]},
+								"down": {"uv": [0, 1], "uv_size": [0, -1]}
+							}
+						}
+					]
+				},
+				{
+					"name": "LaserGun",
+					"parent": "Eyebot",
 					"pivot": [0, -1, -2],
 					"cubes": [
-						{"origin": [0, -3, -3], "size": [0, 2, 1], "pivot": [0, -1, -2], "rotation": [-22.5, 0, 0], "uv": [9, 38]},
-						{
-							"origin": [-0.5, -3, -5],
-							"size": [1, 1, 3],
-							"uv": {
-								"north": {"uv": [5, 44], "uv_size": [1, 1]},
-								"east": {"uv": [2, 44], "uv_size": [3, 1]},
-								"west": {"uv": [6, 44], "uv_size": [3, 1]},
-								"up": {"uv": [5, 41], "uv_size": [1, 3]},
-								"down": {"uv": [6, 44], "uv_size": [1, -3]}
-							}
-						},
+						{"origin": [0, -3, -3], "size": [0, 2, 1], "pivot": [0, -1, -2], "rotation": [-22.5, 0, 0], "uv": [9, 38]}
+					]
+				},
+				{
+					"name": "Barrel",
+					"parent": "LaserGun",
+					"pivot": [0, -1.85, -2.875],
+					"cubes": [
 						{
 							"origin": [-0.65, -3.15, -5],
 							"size": [1.3, 1.3, 3],
 							"uv": {
 								"east": {"uv": [2, 44], "uv_size": [3, 1]},
 								"south": {"uv": [9, 44], "uv_size": [1, 1]},
+								"west": {"uv": [6, 44], "uv_size": [3, 1]},
+								"up": {"uv": [5, 41], "uv_size": [1, 3]},
+								"down": {"uv": [6, 44], "uv_size": [1, -3]}
+							}
+						},
+						{
+							"origin": [-0.5, -3, -5],
+							"size": [1, 1, 3],
+							"uv": {
+								"north": {"uv": [5, 44], "uv_size": [1, 1]},
+								"east": {"uv": [2, 44], "uv_size": [3, 1]},
 								"west": {"uv": [6, 44], "uv_size": [3, 1]},
 								"up": {"uv": [5, 41], "uv_size": [1, 3]},
 								"down": {"uv": [6, 44], "uv_size": [1, -3]}

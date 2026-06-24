@@ -78,6 +78,8 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
             SynchedEntityData.defineId(BangbooEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> ENERGY =
             SynchedEntityData.defineId(BangbooEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<String>  CALLABLE_ANIM =
+            SynchedEntityData.defineId(BangbooEntity.class, EntityDataSerializers.STRING);
 
     public  static int maxEnergy()    { return xylopia.core.Config.MAX_ENERGY.get(); }
     private static int fuelEnergyMult() { return xylopia.core.Config.FUEL_ENERGY_MULT.get(); }
@@ -131,6 +133,10 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     private int     fuelBurnRemaining = 0;
     private boolean energyLowFired    = false;
 
+    // ── Callable animations ───────────────────────────────────────────────────
+    private int    callableAnimTicksLeft  = 0;
+    private String callableAnimFinishName = "";
+
     // ─────────────────────────────────────────────────────────────────────────
 
     public BangbooEntity(EntityType<? extends BangbooEntity> type, Level level) {
@@ -144,6 +150,26 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
         super.defineSynchedData(builder);
         builder.define(SKIN_ID, "ccatmos:eous");
         builder.define(ENERGY, maxEnergy());
+        builder.define(CALLABLE_ANIM, "");
+    }
+
+    // ── Callable animation public API ─────────────────────────────────────────
+
+    public String getCallableAnim() { return entityData.get(CALLABLE_ANIM); }
+
+    public void requestCallableAnim(String name) {
+        var anim = BangbooSkinRegistry.INSTANCE.get(getSkinId()).getCallable(name);
+        if (anim == null) return;
+        entityData.set(CALLABLE_ANIM, anim.animationKey());
+        callableAnimFinishName = name;
+        // +5 tick buffer so the stop signal arrives after the animation has settled on its final frame
+        callableAnimTicksLeft  = anim.loop() ? -1 : Math.max(1, (int)(anim.duration() * 20) + 5);
+    }
+
+    public void stopCallableAnim() {
+        entityData.set(CALLABLE_ANIM, "");
+        callableAnimTicksLeft  = 0;
+        callableAnimFinishName = "";
     }
 
     // ── Energy public API ──────────────────────────────────────────────────────
@@ -159,13 +185,28 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // Shared slot so the overlay controller knows which entry to consult
-        String[] currentSlot = {""};
+        // Shared state for both controllers — declared first so both lambdas can close over it
+        String[]        currentSlot   = {""};
+        RawAnimation[]  overlayRaw    = {null};
+        long[]          overlayEndMs  = {-1};
+        long[]          nextTriggerMs = {-1};
 
-        // ── Base locomotion: always plays, never stops ────────────────────────
-        controllers.add(new AnimationController<>(this, "locomotion", 5, state -> {
-            var skin  = BangbooSkinRegistry.INSTANCE.get(getSkinId());
-            String slot = state.isMoving() ? BangbooAnimations.WALK : BangbooAnimations.IDLE;
+        // ── Main: locomotion + callable in one controller so GeckoLib blends ─
+        // Merging them means every transition (callable→idle, idle→walk, etc.)
+        // goes through the controller's own intra-animation blend, instead of
+        // snapping when a separate callable controller drops its bone contributions.
+        controllers.add(new AnimationController<>(this, "locomotion", 15, state -> {
+            var skin = BangbooSkinRegistry.INSTANCE.get(getSkinId());
+
+            String callableAnim = getCallableAnim();
+            if (!callableAnim.isEmpty()) {
+                currentSlot[0]   = "";   // suppress overlay while callable runs
+                nextTriggerMs[0] = -1;   // force fresh overlay schedule when callable ends
+                return state.setAndContinue(RawAnimation.begin().thenPlay(callableAnim));
+            }
+
+            boolean moving = state.isMoving() || !getNavigation().isDone();
+            String slot = moving ? BangbooAnimations.WALK : BangbooAnimations.IDLE;
             currentSlot[0] = slot;
             var entry = skin.getAnimation(slot);
             if (entry == null) return software.bernie.geckolib.animation.PlayState.STOP;
@@ -173,10 +214,6 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
         }));
 
         // ── Overlay: plays variant animations on top, stops when done ─────────
-        RawAnimation[]  overlayRaw   = {null};
-        long[]          overlayEndMs = {-1};
-        long[]          nextTriggerMs = {-1};
-
         controllers.add(new AnimationController<>(this, "overlay", 0, state -> {
             var skin  = BangbooSkinRegistry.INSTANCE.get(getSkinId());
             var entry = skin.getAnimation(currentSlot[0]);
@@ -477,6 +514,7 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
             tickProximity(serverLevel);
             tickPathing();
             tickEnergy(serverLevel);
+            tickCallableAnim();
         }
     }
 
@@ -646,6 +684,16 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
         }
 
         setEnergy(next);
+    }
+
+    private void tickCallableAnim() {
+        if (callableAnimTicksLeft <= 0) return;
+        if (--callableAnimTicksLeft == 0) {
+            String name = callableAnimFinishName;
+            stopCallableAnim();
+            if (serverComputer != null)
+                serverComputer.queueEvent("bangboo_animation_done", new Object[]{name});
+        }
     }
 
     private void tickPathing() {

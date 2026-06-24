@@ -6,9 +6,12 @@ import dan200.computercraft.api.lua.LuaFunction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import xylopia.core.entity.BangbooEntity;
+import xylopia.core.skin.BangbooSkinRegistry;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -113,6 +116,26 @@ public class BangbooBaseAPI implements ILuaAPI {
         var b = require();
         b.setYRot((float) yaw);
         b.yRotO = (float) yaw;
+    }
+
+    // ── Animations ───────────────────────────────────────────────────────────
+
+    @LuaFunction(mainThread = true)
+    public final void playAnimation(String name) throws LuaException {
+        var b = require();
+        if (!BangbooSkinRegistry.INSTANCE.get(b.getSkinId()).supportsCallable(name))
+            throw new LuaException("animation '" + name + "' is not defined for this skin");
+        b.requestCallableAnim(name);
+    }
+
+    @LuaFunction(mainThread = true)
+    public final void stopAnimation() throws LuaException {
+        require().stopCallableAnim();
+    }
+
+    @LuaFunction
+    public final List<String> listAnimations() throws LuaException {
+        return new ArrayList<>(BangbooSkinRegistry.INSTANCE.get(require().getSkinId()).callableAnimations().keySet());
     }
 
     // ── Basic scan ────────────────────────────────────────────────────────────

@@ -5,8 +5,12 @@
 		"animation.bangboo.idle": {
 			"loop": true,
 			"bones": {
-				"Bangoo": {
-					"position": [0, "math.sin(q.anim_time * 180) * 0.5", 0]
+				"Body": {
+					"rotation": [
+						"math.sin(q.anim_time * 100) * 2",
+						0,
+						"math.sin(q.anim_time * 80 + 20) * 1.5"
+					]
 				},
 				"LeftEar": {
 					"rotation": [0, 0, "math.sin(q.anim_time * 150 + 30) * 6"]
@@ -15,13 +19,16 @@
 					"rotation": [0, 0, "math.sin(q.anim_time * 150 + 210) * 6"]
 				},
 				"Tail": {
-					"rotation": ["math.sin(q.anim_time * 120) * 3", 0, 0]
+					"rotation": ["math.sin(q.anim_time * 130) * 4", 0, 0]
+				},
+				"ChargePort": {
+					"rotation": [0, "math.sin(q.anim_time * 90) * 20", 0]
 				},
 				"Scarf": {
-					"rotation": ["math.sin(q.anim_time * 120) * 2", 0, 0]
+					"rotation": ["math.sin(q.anim_time * 100 + 20) * 3", 0, 0]
 				},
-				"ScarfBit": {
-					"rotation": ["math.sin(q.anim_time * 120 + 40) * 3", 0, 0]
+				"ScarfPart": {
+					"rotation": ["math.sin(q.anim_time * 100 + 70) * 5", 0, 0]
 				},
 				"LeftArm": {
 					"rotation": [0, 0, "math.sin(q.anim_time * 150) * 4"]
@@ -36,8 +43,14 @@
 			"loop": true,
 			"bones": {
 				"Bangoo": {
-					"position": [0, "math.abs(math.sin(q.anim_time * 600)) * -0.4", 0],
-					"rotation": ["math.sin(q.anim_time * 600) * 2", 0, 0]
+					"position": [0, "math.abs(math.sin(q.anim_time * 600)) * -0.4", 0]
+				},
+				"Body": {
+					"rotation": [
+						"math.sin(q.anim_time * 600) * 2",
+						0,
+						"math.sin(q.anim_time * 600 + 90) * 2"
+					]
 				},
 				"LeftLeg": {
 					"rotation": ["math.sin(q.anim_time * 600) * 30", 0, 0]
@@ -63,7 +76,7 @@
 				"Scarf": {
 					"rotation": ["-5 + math.sin(q.anim_time * 600) * 3", 0, 0]
 				},
-				"ScarfBit": {
+				"ScarfPart": {
 					"rotation": ["-8 + math.sin(q.anim_time * 600 + 45) * 4", 0, 0]
 				}
 			}
@@ -73,7 +86,7 @@
 			"loop": false,
 			"animation_length": 1.0,
 			"bones": {
-				"TailSpin": {
+				"ChargePort": {
 					"rotation": [0, "q.anim_time * 1440", 0]
 				},
 				"Bangoo": {

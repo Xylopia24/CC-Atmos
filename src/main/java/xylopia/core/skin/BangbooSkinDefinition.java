@@ -11,6 +11,7 @@ public record BangbooSkinDefinition(
         ResourceLocation texture,
         ResourceLocation animation,
         Map<String, AnimEntry> animations,
+        Map<String, CallableAnim> callableAnimations,
         float scale,
         float hitboxWidth,
         float hitboxHeight,
@@ -20,6 +21,14 @@ public record BangbooSkinDefinition(
 ) {
 
     // ── Data types ─────────────────────────────────────────────────────────────
+
+    /**
+     * An animation that Lua code can trigger by name via bangboo.playAnimation().
+     * @param animationKey  Key in the animation JSON file to play
+     * @param loop          True = loop until stopAnimation(); false = play once then fire bangboo_animation_done
+     * @param duration      Seconds to play before firing the done event (only used when loop=false)
+     */
+    public record CallableAnim(String animationKey, boolean loop, float duration) {}
 
     /**
      * A single weighted option inside a variant list.
@@ -54,4 +63,7 @@ public record BangbooSkinDefinition(
 
     public boolean supports(String slot) { return animations.containsKey(slot); }
     public AnimEntry getAnimation(String slot) { return animations.get(slot); }
+
+    public boolean supportsCallable(String name) { return callableAnimations.containsKey(name); }
+    public CallableAnim getCallable(String name) { return callableAnimations.get(name); }
 }

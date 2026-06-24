@@ -29,6 +29,9 @@ public class BangbooSkinRegistry extends SimpleJsonResourceReloadListener {
                 BangbooAnimations.IDLE, new BangbooSkinDefinition.AnimEntry("animation.bangboo.idle", true, List.of()),
                 BangbooAnimations.WALK, new BangbooSkinDefinition.AnimEntry("animation.bangboo.walk", true, List.of())
             ),
+            Map.of(
+                "happy", new BangbooSkinDefinition.CallableAnim("animation.bangboo.happy", false, 1.0f)
+            ),
             0.5f,  // scale
             0.7f,  // hitboxWidth
             1.0f,  // hitboxHeight
@@ -48,7 +51,8 @@ public class BangbooSkinRegistry extends SimpleJsonResourceReloadListener {
                 var geo             = ResourceLocation.parse(json.get("geo").getAsString());
                 var texture         = ResourceLocation.parse(json.get("texture").getAsString());
                 var animation       = ResourceLocation.parse(json.get("animation").getAsString());
-                var animations      = parseAnimations(json);
+                var animations         = parseAnimations(json);
+                var callableAnimations = parseCallableAnimations(json);
                 float scale        = json.has("scale")         ? json.get("scale").getAsFloat()         : 0.5f;
                 float hitboxWidth  = json.has("hitbox_width")  ? json.get("hitbox_width").getAsFloat()  : 0.7f;
                 float hitboxHeight = json.has("hitbox_height") ? json.get("hitbox_height").getAsFloat() : 1.0f;
@@ -59,7 +63,7 @@ public class BangbooSkinRegistry extends SimpleJsonResourceReloadListener {
                     if (arr.size() >= 2) offY = arr.get(1).getAsFloat();
                     if (arr.size() >= 3) offZ = arr.get(2).getAsFloat();
                 }
-                map.put(entry.getKey(), new BangbooSkinDefinition(geo, texture, animation, animations, scale, hitboxWidth, hitboxHeight, offX, offY, offZ));
+                map.put(entry.getKey(), new BangbooSkinDefinition(geo, texture, animation, animations, callableAnimations, scale, hitboxWidth, hitboxHeight, offX, offY, offZ));
             } catch (Exception e) {
                 Atmos.LOGGER.error("Failed to load bangboo skin {}: {}", entry.getKey(), e.getMessage());
             }
@@ -111,6 +115,19 @@ public class BangbooSkinRegistry extends SimpleJsonResourceReloadListener {
             out.put(BangbooAnimations.WALK, new BangbooSkinDefinition.AnimEntry("animation.bangboo.walk", true, List.of()));
         }
 
+        return Collections.unmodifiableMap(out);
+    }
+
+    private static Map<String, BangbooSkinDefinition.CallableAnim> parseCallableAnimations(JsonObject json) {
+        if (!json.has("callable_animations")) return Map.of();
+        var out = new HashMap<String, BangbooSkinDefinition.CallableAnim>();
+        for (var kv : json.getAsJsonObject("callable_animations").entrySet()) {
+            JsonObject obj = kv.getValue().getAsJsonObject();
+            String animKey = obj.get("animation").getAsString();
+            boolean loop   = obj.has("loop") && obj.get("loop").getAsBoolean();
+            float duration = obj.has("duration") ? obj.get("duration").getAsFloat() : 1.0f;
+            out.put(kv.getKey(), new BangbooSkinDefinition.CallableAnim(animKey, loop, duration));
+        }
         return Collections.unmodifiableMap(out);
     }
 

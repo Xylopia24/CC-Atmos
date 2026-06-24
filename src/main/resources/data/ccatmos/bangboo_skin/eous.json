@@ -8,5 +8,8 @@
   "animations": {
     "idle": "animation.bangboo.idle",
     "walk": "animation.bangboo.walk"
+  },
+  "callable_animations": {
+    "happy": { "animation": "animation.bangboo.happy", "loop": false, "duration": 1.0 }
   }
 }

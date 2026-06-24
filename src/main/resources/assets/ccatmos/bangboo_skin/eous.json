@@ -1,9 +1,0 @@
-{
-  "geo": "ccatmos:geo/eous.geo.json",
-  "texture": "ccatmos:textures/entity/skins/eous.png",
-  "animation": "ccatmos:animations/eous.animation.json",
-  "animations": {
-    "idle": "animation.bangboo.idle",
-    "walk": "animation.bangboo.walk"
-  }
-}
