@@ -34,6 +34,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
@@ -43,8 +44,10 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -136,6 +139,11 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
     // ── Callable animations ───────────────────────────────────────────────────
     private int    callableAnimTicksLeft  = 0;
     private String callableAnimFinishName = "";
+
+    // ── Chunk loading ─────────────────────────────────────────────────────────
+    private final Set<Long> forcedChunks = new HashSet<>();
+    private int lastForcedChunkX         = Integer.MIN_VALUE;
+    private int lastForcedChunkZ         = Integer.MIN_VALUE;
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -514,6 +522,7 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
             tickProximity(serverLevel);
             tickPathing();
             tickEnergy(serverLevel);
+            tickChunkloading(serverLevel);
             tickCallableAnim();
         }
     }
@@ -629,6 +638,33 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
     private boolean hasConfigCore() {
         return hasPluginProviding(p -> p instanceof ConfigCoreItem);
+    }
+
+    private void tickChunkloading(ServerLevel level) {
+        int cx = chunkPosition().x;
+        int cz = chunkPosition().z;
+        if (!hasConfigCore()) {
+            if (!forcedChunks.isEmpty()) releaseAllForcedChunks(level);
+            return;
+        }
+        if (cx == lastForcedChunkX && cz == lastForcedChunkZ) return;
+        releaseAllForcedChunks(level);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                level.setChunkForced(cx + dx, cz + dz, true);
+                forcedChunks.add(ChunkPos.asLong(cx + dx, cz + dz));
+            }
+        }
+        lastForcedChunkX = cx;
+        lastForcedChunkZ = cz;
+    }
+
+    private void releaseAllForcedChunks(ServerLevel level) {
+        for (long packed : forcedChunks)
+            level.setChunkForced(ChunkPos.getX(packed), ChunkPos.getZ(packed), false);
+        forcedChunks.clear();
+        lastForcedChunkX = Integer.MIN_VALUE;
+        lastForcedChunkZ = Integer.MIN_VALUE;
     }
 
     private void tickEnergy(ServerLevel level) {
@@ -763,7 +799,10 @@ public class BangbooEntity extends PathfinderMob implements GeoEntity, MenuProvi
 
     @Override
     public void remove(RemovalReason reason) {
-        if (level() instanceof ServerLevel sl) clearLanternBlock(sl);
+        if (level() instanceof ServerLevel sl) {
+            clearLanternBlock(sl);
+            releaseAllForcedChunks(sl);
+        }
         if (serverComputer != null) {
             BangbooComputerRegistry.unregister(computerID);
             serverComputer.close();
